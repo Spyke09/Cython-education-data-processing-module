@@ -1,1 +1,1 @@
-# Module-for-working-with-data-tables-on-C-lang
+# Модуль для обработки и анализа табличных данных на чистом Си для python
