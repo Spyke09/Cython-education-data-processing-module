@@ -132,3 +132,6 @@ dmypy.json
 *.o
 
 .idea
+*.cbp
+*.layout
+*.depend

@@ -13,11 +13,10 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add directory="C:/Users/ad.romanov/AppData/Local/Programs/Python/Python39/include" />
-					<Add directory="C:/Users/ad.romanov/AppData/Local/Programs/Python/Python39" />
+					<Add directory="C:/Users/Valeria/AppData/Local/Programs/Python/Python39/include" />
 				</Compiler>
 				<Linker>
-					<Add library="C:/Users/ad.romanov/AppData/Local/Programs/Python/Python39/libs/python39.lib" />
+					<Add library="C:/Users/Valeria/AppData/Local/Programs/Python/Python39/libs/python39.lib" />
 				</Linker>
 			</Target>
 			<Target title="Release">

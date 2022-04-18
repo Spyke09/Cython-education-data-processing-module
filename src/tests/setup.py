@@ -11,3 +11,5 @@ setup(
     description='Simple module',
     ext_modules=[module1]
 )
+# python setup.py build
+# python setup.py install
