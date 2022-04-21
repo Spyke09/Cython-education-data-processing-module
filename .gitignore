@@ -135,3 +135,4 @@ dmypy.json
 *.cbp
 *.layout
 *.depend
+.vscode
