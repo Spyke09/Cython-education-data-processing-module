@@ -1,34 +1,31 @@
-#include <Python.h>
-#include "column.h"
+#include "main.h"
 
-
-static PyObject *py_plus(PyObject *self, PyObject *args)
+static PyObject *some_tests(PyObject *self, PyObject *args)
 {
-    double x, y;
-    if (!PyArg_ParseTuple(args, "dd", &x, &y))
-        return NULL;
-    return Py_BuildValue("d", x+y);
+    tests();
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 
 static PyMethodDef ownmod_methods[] = {
 {
-    "plus",
-    py_plus,
+    "some_tests",
+    some_tests,
     METH_VARARGS,
-    "Plus function"
+    "Some tests"
 },
 {NULL, NULL, 0, NULL}
 };
 
 static PyModuleDef simple_module = {
     PyModuleDef_HEAD_INIT,
-    "my_plus",
+    "data_table",
     "doc",
     -1,
     ownmod_methods
 };
 
-PyMODINIT_FUNC PyInit_my_plus(void)
+PyMODINIT_FUNC PyInit_data_table(void)
 {
     PyObject* m;
     m = PyModule_Create(&simple_module);
@@ -37,10 +34,10 @@ PyMODINIT_FUNC PyInit_my_plus(void)
     return m;
 }
 
-int main()
+void tests()
 {
     char* str[] = {"23.1","90.234","89.987", "aboba", "0", "1"};
-    column* res = get_column_str(str,6);
+    column* res = get_column_str(str, 6);
     type_column(&res, DOUBLE_TYPE);
     print_column(res);
     column* res_int = get_typed_column(&res, INT_TYPE);
@@ -53,5 +50,10 @@ int main()
     print_column(res_copy);
     column* res_bool = get_typed_column(&res, BOOL_TYPE);
     print_column(res_bool);
+}
+
+int main()
+{
+    tests();
     return 0;
 }

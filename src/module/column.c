@@ -80,12 +80,13 @@ int type_size(TYPE type)
     case STRING_TYPE:
         return sizeof(vector_char_t);
     }
+    return -1;
 }
 
 // создание пустой колонки
 column* create_column(TYPE a, int n)
 {
-    column* res = malloc(sizeof(column));
+    column* res = (column*)malloc(sizeof(column));
     res->type = a;
     res->size = type_size(a);
     res->len = n;
@@ -137,13 +138,11 @@ void print_column(column* a)
             break;
         case DOUBLE_TYPE:
             for (int i = 0; i<a->len; ++i) {
-                double* t = a->values[i];
                 printf("%*f", ot, get_double(a, i));
             }
             break;
         case BOOL_TYPE:
             for (int i = 0; i<a->len; ++i) {
-                int* t = a->values[i];
                 printf("%*s", ot, get_bool(a, i)?"true":"false");
             }
             break;

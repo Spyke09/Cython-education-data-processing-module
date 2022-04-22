@@ -1,3 +1,3 @@
-import my_plus
+import data_table
 
-print(my_plus.plus(1,2))
+data_table.some_tests()
