@@ -180,7 +180,7 @@ void clear_column(column** a)
     if ((*a)->type==STRING_TYPE)
         for (int i = 0; i<(*a)->len; ++i){
             vector_char_t* t = get_str(*a, i);
-            free(t->data);
+            v_clear(t);
         }
     for (int i = 0; i<(*a)->len; ++i) free((*a)->values[i]);
     free((*a)->values);

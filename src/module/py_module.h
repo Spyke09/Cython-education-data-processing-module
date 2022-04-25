@@ -6,7 +6,9 @@ typedef struct
 {
     PyObject_HEAD
     column* col;
-    vector_char_t* name;
+    //vector_char_t* name;
+    char* name;
+
 } py_column;
 
 static PyTypeObject py_column_Type;
@@ -18,4 +20,4 @@ static py_column* py_column_init();
 static PyObject* new_column(PyObject *self, PyObject *args);
 static PyObject *py_fill_column_from_list(py_column *self, PyObject *args);
 static void clear_py_column(py_column* self);
-static void tests();
+void tests();

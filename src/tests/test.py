@@ -2,7 +2,7 @@ import data_table
 
 a = data_table.new_col()
 
-# a.print_column()
-# a.set_name("aboba")
-# # # a.fill_from_list(["1","2","2"])
-# a.print_column()
+a.set_name("aboba")
+a.print_column()
+a.fill_from_list([i/10 for i in range(10)])
+a.print_column()
