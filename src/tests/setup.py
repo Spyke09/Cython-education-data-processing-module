@@ -2,7 +2,7 @@ from distutils.core import setup, Extension
 
 module1 = Extension(
     'data_table',  # module name in interpreter
-    sources=['../module/main.c', '../module/column.c', '../module/vector.c']
+    sources=['../module/py_module.c', '../module/column.c', '../module/vector.c']
 )
 
 setup(

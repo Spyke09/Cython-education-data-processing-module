@@ -1,3 +1,5 @@
-import data_table
+import data_table as dt
 
-data_table.some_tests()
+
+dt.crea()
+
