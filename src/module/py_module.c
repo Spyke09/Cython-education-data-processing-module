@@ -7,15 +7,15 @@ static PyObject *some_tests()
     return Py_None;
 }
 
-static PyObject* py_print_column(py_column* self)
+static PyObject *py_print_column(py_column* self)
 {
-    printf("%s\n",self->name);
+    char* temp_c = vec_to_str(self->name);
+    printf("%s\n", temp_c);
     print_column(self->col);
+    free(temp_c);
     Py_INCREF(Py_None);
     return Py_None;
 }
-
-
 
 static PyMethodDef ownmod_methods[] = {
     {
@@ -25,56 +25,112 @@ static PyMethodDef ownmod_methods[] = {
         "Some tests"
     },
     {
+        "new_col",
+        new_column,
+        METH_VARARGS,
+        "New column"
+    },
+    {NULL, NULL, 0, NULL}
+};
+
+static PyMethodDef column_methods[] = {
+    {
         "print_column",
         py_print_column,
         METH_VARARGS,
         "Print column"
     },
+    {
+        "set_name",
+        py_set_name_column,
+        METH_VARARGS,
+        "Set name for column"
+    },
+    {
+        "fill_from_list",
+        py_fill_column_from_list,
+        METH_VARARGS,
+        "Fill column from list"
+    },
     {NULL, NULL, 0, NULL}
 };
 
-static int py_column_init(py_column *self, PyObject *args, PyObject *kwds)
+static py_column* py_column_init()
 {
+    py_column *self;
+    self = PyObject_NEW(py_column, &py_column_Type);
+    self->col = create_column(INT_TYPE, 20);
+    vector_char_t* t;
+    v_init(t);
+    str_to_vec(t, "unnamed");
+    self->name = t;
     printf("column init\n");
-    self->col = create_column(INT_TYPE, 10);
-    self->name = "unnamed";
-    return 0;
+    return self;
 }
 
-static void py_column_dealloc(py_column* self)
+static PyObject* py_set_name_column(py_column *self, PyObject *args)
 {
+    if (!PyArg_ParseTuple(args, "s", &self->name))
+        return NULL;
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyObject* new_column(PyObject *self, PyObject *args)
+{
+    PyObject* temp = (PyObject*)py_column_init();
+    return temp;
+}
+
+static PyObject *py_fill_column_from_list(py_column *self, PyObject *args)
+{
+    printf("start");
+    type_column(&(self->col), STRING_TYPE);
+    PyObject *pList;
+    PyObject *pItem;
+    Py_ssize_t n;
+    if (!PyArg_ParseTuple(args, "O!", &PyList_Type, &pList)) {
+        PyErr_SetString(PyExc_TypeError, "parameter must be a list.");
+        return NULL;
+    }
+
+    n = PyList_Size(pList);
+    if (n!=(self->col)->len) {
+        PyErr_SetString(PyExc_TypeError, "Invalid size");
+        return NULL;
+    }
+    for (int i=0; i<n; i++) {
+        pItem = PyList_GetItem(pList, i);
+//        if(!PyString_Check(pItem)) {
+//            PyErr_SetString(PyExc_TypeError, "list items must be integers.");
+//            return NULL;
+//        }
+        char *temp;
+        PyArg_ParseTuple(args, "s", &temp);
+        set_str(self->col, temp, i);
+    }
+    Py_INCREF(Py_None);
+    printf("finidsh");
+    return Py_None;
+}
+
+static void clear_py_column(py_column* self)
+{
+    v_clear(self->name);
     clear_column(&(self->col));
-    Py_XDECREF(self->col);
-    free(self->name);
+}
+
+static void py_column_dealloc(py_column *self)
+{
+    clear_py_column(self);
+    Py_XDECREF(&self->col);
     Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
-static PyModuleDef simple_module = {
-    PyModuleDef_HEAD_INIT,
-    "data_table",
-    "doc",
-    -1,
-    ownmod_methods
-};
 
-PyMODINIT_FUNC PyInit_data_table(void)
-{
-    PyObject* m;
-    py_column_Type.tp_new = PyType_GenericNew;
-	if(PyType_Ready(&py_column_Type) < 0)
-    	    return NULL;
-    m = PyModule_Create(&simple_module);
-    if (m==NULL)
-        return NULL;
-    Py_INCREF(&py_column_Type);
-	PyModule_AddObject(m, "crea", (PyObject *)&py_column_Type);
-    return m;
-}
 
 static PyTypeObject py_column_Type = {
-     /* Everything about object */
      PyVarObject_HEAD_INIT(NULL, 0)
-     //tp_name � ��� ����
      "py_column",         	/* tp_name */
      //tp_basicsize � ������ �������, ���� ������ ���� �� ��������
       sizeof(py_column), /* tp_basicsize */
@@ -108,7 +164,7 @@ static PyTypeObject py_column_Type = {
 	0,                   	/* tp_iter */
 	0,                   	/* tp_iternext */
        //tp_methods � ��������� �� ��������� � �������� ������
-	ownmod_methods,     	 /* tp_methods */
+	column_methods,     	 /* tp_methods */
 	0,                   	/* tp_members */
 	0,                   	/* tp_getset */
 	0,                   	/* tp_base */
@@ -117,12 +173,34 @@ static PyTypeObject py_column_Type = {
 	0,                   	/* tp_descr_set */
 	0,                   	/* tp_dictoffset */
        //tp_init � ��������� �� �����������
-	(initproc)py_column_init,   /* tp_init */
+	0,   /* tp_init */
 	0,                   	/* tp_alloc */
 	0,                   	/* tp_new */
 };
 
-void tests()
+static PyModuleDef simple_module = {
+    PyModuleDef_HEAD_INIT,
+    "data_table",
+    "doc",
+    -1,
+    ownmod_methods
+};
+
+
+PyMODINIT_FUNC PyInit_data_table(void)
+{
+    PyObject* m;
+    py_column_Type.tp_new = PyType_GenericNew;
+	if(PyType_Ready(&py_column_Type) < 0)
+    	    return NULL;
+    m = PyModule_Create(&simple_module);
+    if (m==NULL)
+        return NULL;
+    Py_INCREF(&py_column_Type);
+    return m;
+}
+
+static void tests()
 {
     char* str[] = {"23.1","90.234","89.987", "aboba", "0", "1"};
     column* res = get_column_str(str, 6);

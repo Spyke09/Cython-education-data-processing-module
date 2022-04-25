@@ -1,11 +1,17 @@
 #include "column.h"
 
 // сеттеры для каждого типа для абстргирования от ссылок и указателей
-void set_str(column* a, vector_char_t* value, int ind)
+void set_vec_str(column* a, vector_char_t* value, int ind)
 {
     free(((vector_char_t*)(a->values[ind]))->data);
     free(a->values[ind]);
     *(vector_char_t*)(a->values[ind]) = *value;
+}
+
+void set_str(column* a, char* value, int ind)
+{
+    free(((vector_char_t*)(a->values[ind]))->data);
+    str_to_vec(a->values[ind], value);
 }
 
 void set_char(column* a, char value, int ind, int jnd)
