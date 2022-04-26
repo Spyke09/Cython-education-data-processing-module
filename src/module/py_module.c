@@ -14,8 +14,33 @@ static PyObject* py_set_name_column(py_column *self, PyObject *args)
 
 static PyObject* new_column(PyObject *self, PyObject *args)
 {
-    PyObject* temp = (PyObject*)py_column_init();
+    int size;
+    if (!PyArg_ParseTuple(args, "i", &size))
+        return NULL;
+    //printf("size %d\n", size);
+    PyObject* temp = (PyObject*)py_column_init(size);
     return temp;
+}
+
+static py_column* py_column_init(int size)
+{
+    py_column *self;
+    self = PyObject_NEW(py_column, &py_column_Type);
+    self->col = create_column(INT_TYPE, size);
+//    vector_char_t* t = malloc(sizeof(vector_char_t*));
+//    v_init(t);
+//    self->name = t;
+    char* a = "unnamed";
+//    str_to_vec(t, a);
+    self->name = a;
+    //printf("column init\n");
+    return self;
+}
+
+static PyObject *len_of_py_column(py_column *self)
+{
+    int size = self->col->len;
+    return Py_BuildValue("i", size);
 }
 
 static PyObject *py_fill_column_from_list(py_column *self, PyObject *args)
@@ -53,32 +78,18 @@ static void clear_py_column(py_column* self)
     clear_column(&(self->col));
 }
 
-static PyObject *some_tests()
-{
-    tests();
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
 static PyObject *py_print_column(py_column* self)
 {
 //    char* temp_c = vec_to_str(self->name);
 //    printf("%s\n", temp_c);
 //    free(temp_c);
-    printf(self->name);
+    printf("%s\n", self->name);
     print_column(self->col);
     Py_INCREF(Py_None);
     return Py_None;
 }
 
 static PyMethodDef ownmod_methods[] = {
-    {
-        "some_tests",
-        some_tests,
-        METH_VARARGS,
-        "Some tests"
-    },
     {
         "new_col",
         new_column,
@@ -87,20 +98,6 @@ static PyMethodDef ownmod_methods[] = {
     },
     {NULL, NULL, 0, NULL}
 };
-
-static py_column* py_column_init()
-{
-    py_column *self;
-    self = PyObject_NEW(py_column, &py_column_Type);
-    self->col = create_column(INT_TYPE, 10);
-//    vector_char_t* t = malloc(sizeof(vector_char_t*));
-//    v_init(t);
-//    self->name = t;
-    char* a = "unnamed";
-//    str_to_vec(t, a);
-    printf("column init\n");
-    return self;
-}
 
 static void py_column_dealloc(py_column *self)
 {
@@ -127,6 +124,12 @@ static PyMethodDef column_methods[] = {
         py_fill_column_from_list,
         METH_VARARGS,
         "Fill column from list"
+    },
+    {
+        "len",
+        len_of_py_column,
+        METH_VARARGS,
+        "Len of column"
     },
     {NULL, NULL, 0, NULL}
 };
@@ -202,29 +205,3 @@ static PyTypeObject py_column_Type = {
 	0,                   	/* tp_alloc */
 	0,                   	/* tp_new */
 };
-
-
-
-void tests()
-{
-    char* str[] = {"23.1","90.234","89.987", "aboba", "0", "1"};
-    column* res = get_column_str(str, 6);
-    type_column(&res, DOUBLE_TYPE);
-    print_column(res);
-    column* res_int = get_typed_column(&res, INT_TYPE);
-    print_column(res_int);
-    column* res_double = get_typed_column(&res, DOUBLE_TYPE);
-    print_column(res_double);
-    column* res_copy = get_typed_column(&res, STRING_TYPE);
-
-    set_char(res_copy, 'A', 3, 0);
-    print_column(res_copy);
-    column* res_bool = get_typed_column(&res, BOOL_TYPE);
-    print_column(res_bool);
-}
-
-int main()
-{
-    tests();
-    return 0;
-}
