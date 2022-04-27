@@ -10,6 +10,7 @@ void set_vec_str(column* a, vector_char_t* value, int ind)
 
 void set_str(column* a, char* value, int ind)
 {
+    free(((vector_char_t*)(a->values[ind]))->data);
     str_to_vec(a->values[ind], value);
 }
 
@@ -179,7 +180,7 @@ void clear_column(column** a)
     if ((*a)->type==STRING_TYPE)
         for (int i = 0; i<(*a)->len; ++i){
             vector_char_t* t = get_str(*a, i);
-            free(t->data);
+            v_clear(t);
         }
     for (int i = 0; i<(*a)->len; ++i) free((*a)->values[i]);
     free((*a)->values);

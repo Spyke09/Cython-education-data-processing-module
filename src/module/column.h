@@ -23,8 +23,8 @@ typedef struct _column
     int len;
 } column;
 
-void set_str(column* a, char* value, int ind);
 void set_vec_str(column* a, vector_char_t* value, int ind);
+void set_str(column* a, char* value, int ind);
 void set_char(column* a, char value, int ind, int jnd);
 void set_int(column* a, int value, int ind);
 void set_double(column* a, double value, int ind);
@@ -43,9 +43,6 @@ column* create_column(TYPE a, int n);
 void print_column(column* a);
 column* get_column_str(char** str, int len);
 void clear_column(column** a);
-column* get_typed_column_from_str(column** an, TYPE type);
-column* get_typed_column_from_int(column** an, TYPE type);
-column* get_typed_column_from_double(column** an, TYPE type);
 column* get_typed_column(column** an, TYPE type);
 void type_column(column** an, TYPE type);
 
