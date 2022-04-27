@@ -34,13 +34,13 @@ table* read_csv(int rows, int columns, char* filename, char* delim)
     return data;
 }
 
-int main()
-{
-	table* test = read_csv(3, 3, "data/1.csv", ",\n");
-	print_column(test->columns[0]);
-	print_column(test->columns[1]);
-	print_column(test->columns[2]);
-	return 0;
-}
+//int main()
+//{
+//	table* test = read_csv(3, 3, "data/1.csv", ",\n");
+//	print_column(test->columns[0]);
+//	print_column(test->columns[1]);
+//	print_column(test->columns[2]);
+//	return 0;
+//}
 
 
