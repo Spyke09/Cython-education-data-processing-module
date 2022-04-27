@@ -7,3 +7,6 @@ a.set_name("my column")
 p_list = [1+i/9 for i in range(a.len())]
 a.fill_from_list(p_list)
 a.print_column()
+
+
+b = data_table.new_table()
