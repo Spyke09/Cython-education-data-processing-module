@@ -1,4 +1,7 @@
 #include "main.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 static PyObject *some_tests(PyObject *self, PyObject *args)
 {
@@ -50,10 +53,4 @@ void tests()
     print_column(res_copy);
     column* res_bool = get_typed_column(&res, BOOL_TYPE);
     print_column(res_bool);
-}
-
-int main()
-{
-    tests();
-    return 0;
 }
