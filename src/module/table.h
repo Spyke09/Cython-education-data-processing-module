@@ -12,4 +12,4 @@ typedef struct _table
     char** c_names;
 } table;
 
-void read_csv(int rows, int columns, char* filename, char* delim);
+table* read_csv(int rows, int columns, char* filename, char* delim);

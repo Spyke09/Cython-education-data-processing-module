@@ -23,7 +23,8 @@ typedef struct _column
     int len;
 } column;
 
-void set_str(column* a, vector_char_t* value, int ind);
+void set_str(column* a, char* value, int ind);
+void set_vec_str(column* a, vector_char_t* value, int ind);
 void set_char(column* a, char value, int ind, int jnd);
 void set_int(column* a, int value, int ind);
 void set_double(column* a, double value, int ind);
