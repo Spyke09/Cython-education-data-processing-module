@@ -22,18 +22,23 @@ static PyObject* new_column(PyObject *self, PyObject *args)
     return temp;
 }
 
+static PyObject* new_table(PyObject *self, PyObject *args)
+{
+    py_table* temp;
+    temp = PyObject_NEW(py_table, &py_table_Type);
+    char* fl = "C:\\Users\\Valeria\\PycharmProjects\\Data-processing-and-analysis\\data\\1.csv";
+    temp->dt = table_from_csv(3, 3, fl, ",\n");
+    printf("fsef\n");
+    return temp;
+}
+
 static py_column* py_column_init(int size)
 {
     py_column *self;
     self = PyObject_NEW(py_column, &py_column_Type);
     self->col = create_column(INT_TYPE, size);
-//    vector_char_t* t = malloc(sizeof(vector_char_t*));
-//    v_init(t);
-//    self->name = t;
     char* a = "unnamed";
-//    str_to_vec(t, a);
     self->name = a;
-    //printf("column init\n");
     return self;
 }
 
@@ -78,6 +83,14 @@ static void clear_py_column(py_column* self)
     clear_column(&(self->col));
 }
 
+static void clear_py_table(py_table *self)
+{
+    for (int i=0; i<self->dt->len; i++)
+    {
+        clear_column(&(self->dt->columns[i]->col));
+    }
+}
+
 static PyObject *py_print_column(py_column* self)
 {
 //    char* temp_c = vec_to_str(self->name);
@@ -89,6 +102,16 @@ static PyObject *py_print_column(py_column* self)
     return Py_None;
 }
 
+static PyObject *py_print_table(py_table* self)
+{
+    for (int i=0; i<self->dt->len; i++)
+    {
+        py_print_column(self->dt->columns[i]);
+    }
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
 static PyMethodDef ownmod_methods[] = {
     {
         "new_col",
@@ -96,13 +119,26 @@ static PyMethodDef ownmod_methods[] = {
         METH_VARARGS,
         "New column"
     },
+    {
+        "new_table",
+        new_table,
+        METH_VARARGS,
+        "New table"
+    },
     {NULL, NULL, 0, NULL}
 };
 
 static void py_column_dealloc(py_column *self)
 {
     clear_py_column(self);
-    Py_XDECREF(&self->col);
+    Py_XDECREF(self);
+    Py_TYPE(self)->tp_free((PyObject*)self);
+}
+
+static void py_table_dealloc(py_table *self)
+{
+    clear_py_table(self);
+    Py_XDECREF(self);
     Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
@@ -134,6 +170,16 @@ static PyMethodDef column_methods[] = {
     {NULL, NULL, 0, NULL}
 };
 
+static PyMethodDef table_methods[] = {
+    {
+        "print_table",
+        py_print_table,
+        METH_VARARGS,
+        "Print table"
+    },
+    {NULL, NULL, 0, NULL}
+};
+
 static PyModuleDef simple_module = {
     PyModuleDef_HEAD_INIT,
     "data_table",
@@ -146,12 +192,14 @@ PyMODINIT_FUNC PyInit_data_table(void)
 {
     PyObject* m;
     py_column_Type.tp_new = PyType_GenericNew;
-	if(PyType_Ready(&py_column_Type) < 0)
+    py_table_Type.tp_new = PyType_GenericNew;
+	if(PyType_Ready(&py_column_Type) < 0 && PyType_Ready(&py_table_Type) < 0)
     	    return NULL;
     m = PyModule_Create(&simple_module);
     if (m==NULL)
         return NULL;
     Py_INCREF(&py_column_Type);
+    Py_INCREF(&py_table_Type);
     return m;
 }
 
@@ -193,6 +241,57 @@ static PyTypeObject py_column_Type = {
 	0,                   	/* tp_iternext */
        //tp_methods – указатель на структуру с методами класса
 	column_methods,     	 /* tp_methods */
+	0,                   	/* tp_members */
+	0,                   	/* tp_getset */
+	0,                   	/* tp_base */
+	0,                   	/* tp_dict */
+	0,                   	/* tp_descr_get */
+	0,                   	/* tp_descr_set */
+	0,                   	/* tp_dictoffset */
+       //tp_init – указатель на конструктор
+	0,   /* tp_init */
+	0,                   	/* tp_alloc */
+	0,                   	/* tp_new */
+};
+
+static PyTypeObject py_table_Type = {
+     /* Everything about object */
+     PyVarObject_HEAD_INIT(NULL, 0)
+     //tp_name – имя типа
+     "py_table",         	/* tp_name */
+     //tp_basicsize – размер объекта, если размер типа не изменяем
+      sizeof(py_table), /* tp_basicsize */
+      /*tp_itemsize – если размер типа изменяем,
+      то размер объекта = tp_basicsize + N* tp_itemsize, где N – “длина” объекта.
+      */
+    	0,                   	/* tp_itemsize */
+//tp_dealloc – деструктор
+	(destructor)py_table_dealloc,                   	/* tp_dealloc */
+	0,                   	/* tp_print */
+	0,                   	/* tp_getattr */
+	0,                   	/* tp_setattr */
+	0,                   	/* tp_reserved */
+	0,                   	/* tp_repr */
+	0,                   	/* tp_as_number */
+	0,                	   /* tp_as_sequence */
+	0,                   	/* tp_as_mapping */
+	0,                   	/* tp_hash */
+	0,                   	/* tp_call */
+	0,                   	/* tp_str */
+	0,                   	/* tp_getattro */
+	0,                       /* tp_setattro */
+	0,                   	/* tp_as_buffer */
+	Py_TPFLAGS_DEFAULT,    	/* tp_flags */
+        //tp_doc -строка документации
+	"Table objects (columns and rows)",       	/* tp_doc: test.Test.__doc__ */
+	0,                   	/* tp_traverse */
+	0,                       /* tp_clear */
+	0,                   	/* tp_richcompare */
+	0,                   	/* tp_weaklistoffset */
+	0,                   	/* tp_iter */
+	0,                   	/* tp_iternext */
+       //tp_methods – указатель на структуру с методами класса
+	table_methods,     	 /* tp_methods */
 	0,                   	/* tp_members */
 	0,                   	/* tp_getset */
 	0,                   	/* tp_base */

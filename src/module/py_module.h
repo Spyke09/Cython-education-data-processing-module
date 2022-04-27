@@ -1,17 +1,18 @@
 #include <Python.h>
 #include "column.h"
 #include "vector.h"
+#include "table.h"
 
 typedef struct
 {
     PyObject_HEAD
-    column* col;
-    //vector_char_t* name;
-    char* name;
-
-} py_column;
+    table* dt;
+} py_table;
 
 static PyTypeObject py_column_Type;
+static PyTypeObject py_table_Type;
+
+static PyObject* new_table(PyObject *self, PyObject *args);
 
 static PyObject *py_print_column(py_column* self);
 static PyObject* py_set_name_column(py_column *self, PyObject *args);
