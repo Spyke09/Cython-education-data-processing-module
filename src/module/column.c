@@ -314,3 +314,9 @@ void type_column(column** an, TYPE type)
     clear_column(an);
     *an = b;
 }
+
+void print_vec_str(vector_char_t* t)
+{
+    for (int i = 0; i<t->len; ++i) printf("%c", t->data[i]);
+    printf("\n");
+}

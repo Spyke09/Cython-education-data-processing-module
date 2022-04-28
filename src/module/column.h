@@ -21,6 +21,7 @@ typedef struct _column
     TYPE type;
     int size;
     int len;
+    vector_char_t* name;
 } column;
 
 void set_vec_str(column* a, vector_char_t* value, int ind);
@@ -45,5 +46,7 @@ column* get_column_str(char** str, int len);
 void clear_column(column** a);
 column* get_typed_column(column** an, TYPE type);
 void type_column(column** an, TYPE type);
+
+void print_vec_str(vector_char_t* t);
 
 #endif
