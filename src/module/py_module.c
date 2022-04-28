@@ -28,8 +28,8 @@ static PyObject* new_table(PyObject *self, PyObject *args)
     temp = PyObject_NEW(py_table, &py_table_Type);
     char* fl = "C:\\Users\\Valeria\\PycharmProjects\\Data-processing-and-analysis\\data\\1.csv";
     temp->dt = table_from_csv(3, 3, fl, ",\n");
-    printf("fsef\n");
-    return temp;
+    py_print_table(temp);
+    return (PyObject*)temp;
 }
 
 static py_column* py_column_init(int size)
@@ -93,9 +93,6 @@ static void clear_py_table(py_table *self)
 
 static PyObject *py_print_column(py_column* self)
 {
-//    char* temp_c = vec_to_str(self->name);
-//    printf("%s\n", temp_c);
-//    free(temp_c);
     printf("%s\n", self->name);
     print_column(self->col);
     Py_INCREF(Py_None);
@@ -254,6 +251,7 @@ static PyTypeObject py_column_Type = {
 	0,                   	/* tp_new */
 };
 
+
 static PyTypeObject py_table_Type = {
      /* Everything about object */
      PyVarObject_HEAD_INIT(NULL, 0)
@@ -283,7 +281,7 @@ static PyTypeObject py_table_Type = {
 	0,                   	/* tp_as_buffer */
 	Py_TPFLAGS_DEFAULT,    	/* tp_flags */
         //tp_doc -строка документации
-	"Table objects (columns and rows)",       	/* tp_doc: test.Test.__doc__ */
+	"Table objects",       	/* tp_doc: test.Test.__doc__ */
 	0,                   	/* tp_traverse */
 	0,                       /* tp_clear */
 	0,                   	/* tp_richcompare */

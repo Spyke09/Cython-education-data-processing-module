@@ -13,6 +13,7 @@ static PyTypeObject py_column_Type;
 static PyTypeObject py_table_Type;
 
 static PyObject* new_table(PyObject *self, PyObject *args);
+static PyObject *py_print_table(py_table* self);
 
 static PyObject *py_print_column(py_column* self);
 static PyObject* py_set_name_column(py_column *self, PyObject *args);
