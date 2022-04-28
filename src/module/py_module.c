@@ -2,12 +2,10 @@
 
 static PyObject* py_set_name_column(py_column *self, PyObject *args)
 {
-//    char *temp;
-//    if (!PyArg_ParseTuple(args, "s", &temp))
-//        return NULL;
-//    str_to_vec(self->name, temp);
-    if (!PyArg_ParseTuple(args, "s", &self->name))
-            return NULL;
+    char *temp;
+    if (!PyArg_ParseTuple(args, "s", &temp))
+        return NULL;
+    str_to_vec(self->col->name, temp);
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -26,9 +24,8 @@ static PyObject* new_table(PyObject *self, PyObject *args)
 {
     py_table* temp;
     temp = PyObject_NEW(py_table, &py_table_Type);
-    char* fl = "C:\\Users\\Valeria\\PycharmProjects\\Data-processing-and-analysis\\data\\1.csv";
-    temp->dt = table_from_csv(3, 3, fl, ",\n");
-    py_print_table(temp);
+    char* fl = "C:\\Users\\User\\PycharmProjects\\Data-processing-and-analysis\\data\\orders.csv";
+    temp->dt = table_from_csv(fl, ',');
     return (PyObject*)temp;
 }
 
@@ -38,7 +35,8 @@ static py_column* py_column_init(int size)
     self = PyObject_NEW(py_column, &py_column_Type);
     self->col = create_column(INT_TYPE, size);
     char* a = "unnamed";
-    self->name = a;
+    v_init(self->col->name);
+    str_to_vec(self->col->name, a);
     return self;
 }
 
@@ -79,7 +77,6 @@ static PyObject *py_fill_column_from_list(py_column *self, PyObject *args)
 
 static void clear_py_column(py_column* self)
 {
-//    v_clear(self->name);
     clear_column(&(self->col));
 }
 
@@ -87,23 +84,31 @@ static void clear_py_table(py_table *self)
 {
     for (int i=0; i<self->dt->len; i++)
     {
-        clear_column(&(self->dt->columns[i]->col));
+        clear_column(&(self->dt->columns[i]));
     }
 }
 
-static PyObject *py_print_column(py_column* self)
+static PyObject *py_print_column(py_column* self, PyObject *args)
 {
-    printf("%s\n", self->name);
+    print_vec_str(self->col->name);
     print_column(self->col);
     Py_INCREF(Py_None);
     return Py_None;
+}
+
+static PyObject* table_shape(py_table* self)
+{
+    int cols = self->dt->len;
+    int rows = self->dt->columns[0]->len;
+    return Py_BuildValue("ii", rows, cols);
 }
 
 static PyObject *py_print_table(py_table* self)
 {
     for (int i=0; i<self->dt->len; i++)
     {
-        py_print_column(self->dt->columns[i]);
+        print_vec_str(self->dt->columns[i]->name);
+        print_column(self->dt->columns[i]);
     }
     Py_INCREF(Py_None);
     return Py_None;
@@ -136,7 +141,7 @@ static void py_table_dealloc(py_table *self)
 {
     clear_py_table(self);
     Py_XDECREF(self);
-    Py_TYPE(self)->tp_free((PyObject*)self);
+    //Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
 static PyMethodDef column_methods[] = {
@@ -174,6 +179,12 @@ static PyMethodDef table_methods[] = {
         METH_VARARGS,
         "Print table"
     },
+    {
+        "shape",
+        table_shape,
+        METH_VARARGS,
+        "Shape of table"
+    },
     {NULL, NULL, 0, NULL}
 };
 
@@ -190,11 +201,12 @@ PyMODINIT_FUNC PyInit_data_table(void)
     PyObject* m;
     py_column_Type.tp_new = PyType_GenericNew;
     py_table_Type.tp_new = PyType_GenericNew;
-	if(PyType_Ready(&py_column_Type) < 0 && PyType_Ready(&py_table_Type) < 0)
+	if(PyType_Ready(&py_column_Type) < 0 || PyType_Ready(&py_table_Type) < 0)
     	    return NULL;
     m = PyModule_Create(&simple_module);
     if (m==NULL)
         return NULL;
+
     Py_INCREF(&py_column_Type);
     Py_INCREF(&py_table_Type);
     return m;
