@@ -2,10 +2,6 @@
 
 static PyObject* py_set_name_column(py_column *self, PyObject *args)
 {
-//    char *temp;
-//    if (!PyArg_ParseTuple(args, "s", &temp))
-//        return NULL;
-//    str_to_vec(self->name, temp);
     if (!PyArg_ParseTuple(args, "s", &self->name))
             return NULL;
     Py_INCREF(Py_None);
@@ -17,7 +13,6 @@ static PyObject* new_column(PyObject *self, PyObject *args)
     int size;
     if (!PyArg_ParseTuple(args, "i", &size))
         return NULL;
-    //printf("size %d\n", size);
     PyObject* temp = (PyObject*)py_column_init(size);
     return temp;
 }
@@ -27,13 +22,8 @@ static py_column* py_column_init(int size)
     py_column *self;
     self = PyObject_NEW(py_column, &py_column_Type);
     self->col = create_column(INT_TYPE, size);
-//    vector_char_t* t = malloc(sizeof(vector_char_t*));
-//    v_init(t);
-//    self->name = t;
     char* a = "unnamed";
-//    str_to_vec(t, a);
     self->name = a;
-    //printf("column init\n");
     return self;
 }
 
@@ -61,10 +51,6 @@ static PyObject *py_fill_column_from_list(py_column *self, PyObject *args)
     }
     for (int i=0; i<n; i++) {
         pItem = PyList_GetItem(pList, i);
-//        if(!PyString_Check(pItem)) {
-//            PyErr_SetString(PyExc_TypeError, "list items must be integers.");
-//            return NULL;
-//        }
         double s = PyFloat_AsDouble(pItem);
         set_double(self->col, s, i);
     }
@@ -74,15 +60,11 @@ static PyObject *py_fill_column_from_list(py_column *self, PyObject *args)
 
 static void clear_py_column(py_column* self)
 {
-//    v_clear(self->name);
     clear_column(&(self->col));
 }
 
 static PyObject *py_print_column(py_column* self)
 {
-//    char* temp_c = vec_to_str(self->name);
-//    printf("%s\n", temp_c);
-//    free(temp_c);
     printf("%s\n", self->name);
     print_column(self->col);
     Py_INCREF(Py_None);
