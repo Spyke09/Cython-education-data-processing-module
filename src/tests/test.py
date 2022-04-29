@@ -9,5 +9,5 @@ import data_table
 # a.print_column()
 
 
-b = data_table.new_table()
+b = data_table.new_table("D:\\Programming\\Python\\PycharmProjects\\Data-processing-and-analysis\\data\\1.csv")
 b.print_table()

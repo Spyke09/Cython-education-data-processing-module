@@ -22,10 +22,12 @@ static PyObject* new_column(PyObject *self, PyObject *args)
 
 static PyObject* new_table(PyObject *self, PyObject *args)
 {
+    char *filename;
+    if (!PyArg_ParseTuple(args, "s", &filename))
+        return NULL;
     py_table* temp;
     temp = PyObject_NEW(py_table, &py_table_Type);
-    char* fl = "C:\\Users\\User\\PycharmProjects\\Data-processing-and-analysis\\data\\orders.csv";
-    temp->dt = table_from_csv(fl, ',');
+    temp->dt = table_from_csv(filename, ',');
     return (PyObject*)temp;
 }
 
