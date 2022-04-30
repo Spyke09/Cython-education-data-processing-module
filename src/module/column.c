@@ -193,6 +193,7 @@ column* get_typed_column_from_str(column** an, TYPE type)
 {
     column* a = *an;
     column* b = create_column(type, a->len);
+    b->name = a->name;
     switch(type)
     {
         case INT_TYPE:
@@ -234,6 +235,7 @@ column* get_typed_column_from_int(column** an, TYPE type)
 {
     column* a = *an;
     column* b = create_column(type, a->len);
+    b->name = a->name;
     switch(type)
     {
         case INT_TYPE:
@@ -264,6 +266,7 @@ column* get_typed_column_from_double(column** an, TYPE type)
 {
     column* a = *an;
     column* b = create_column(type, a->len);
+    b->name = a->name;
     switch(type)
     {
         case INT_TYPE:
