@@ -184,6 +184,43 @@ static PyObject* py_get_max_value(PyObject* a, PyObject* args)
     }
 }
 
+static PyObject* py_get_min_value(PyObject* a, PyObject* args)
+{
+    py_column* self = (py_column*)a;
+    switch(self->col->type)
+    {
+        case INT_TYPE:
+            int min_i = INT_MAX;
+            for (int i = 0; i < self->col->len; i++)
+            {
+                if (get_int(self->col, i) < min_i) min_i = get_int(self->col, i);
+            }
+            return Py_BuildValue("i", min_i);
+                break;
+        case DOUBLE_TYPE:
+            double min_d = DBL_MAX;
+            for (int i = 0; i < self->col->len; i++)
+            {
+                if (get_double(self->col, i) < min_d) min_d = get_double(self->col, i);
+            }
+            return Py_BuildValue("d", min_d);
+            break;
+        case BOOL_TYPE:
+            return Py_BuildValue("i", 0);
+            break;
+        case STRING_TYPE:
+            char* min_s = vec_to_str(get_str(self->col, 0));
+            for (int i = 0; i < self->col->len; i++)
+            {
+                char* st = vec_to_str(get_str(self->col, i));
+                if (strlen(st) < strlen(min_s)) min_s = st;
+                free(st);
+            }
+            return Py_BuildValue("s", min_s);
+            break;
+    }
+}
+
 static PyObject* get_column_from_name(PyObject* a, PyObject* args)
 {
     py_table* self = (py_table*)a;
@@ -327,6 +364,12 @@ static PyMethodDef column_methods[] = {
         py_get_max_value,
         METH_VARARGS,
         "Getter of maxvalue of a column"
+    },
+    {
+        "min",
+        py_get_min_value,
+        METH_VARARGS,
+        "Getter of minvalue of a column"
     },
     {NULL, NULL, 0, NULL}
 };
