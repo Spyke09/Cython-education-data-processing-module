@@ -96,14 +96,43 @@ table* table_from_csv(char* filename, char del)
     return data;
 }
 
-int main()
+void print_table(table* table)
 {
-	//table* test = table_from_csv("data/1.csv",',');
-    vector_char_t* t = malloc(sizeof(vector_char_t));
-    v_init(t);
-    str_to_vec(t,"sefefe");
-    print_vec_str(t);
-	return 0;
+    int ot = 20;
+
+    for (int n = 0;n < table->len; n++)
+    {
+        vector_char_t* v = table->columns[n]->name;
+        char* st = vec_to_str(v);
+        printf("%*s", ot, st);
+        free(st);
+    }
+    printf("\n");
+    for (int i=0;i<ot*(table->len);i++) printf("_");
+    printf("\n");
+
+    for (int i = 0; i<table->columns[0]->len; i++)
+    {
+        for (int j = 0; j<table->len; j++)
+        {
+            switch (table->columns[j]->type)
+            {
+                case INT_TYPE:
+                    printf("%*d", ot, get_int(table->columns[j], i));
+                    break;
+                case DOUBLE_TYPE:
+                    printf("%*f", ot, get_double(table->columns[j], i));
+                    break;
+                case BOOL_TYPE:
+                    printf("%*s", ot, get_bool(table->columns[j], i) ? "true" : "false");
+                    break;
+                case STRING_TYPE:
+                    char* st = vec_to_str(get_str(table->columns[j],i));
+                    printf("%*s", ot, st);
+                    free(st);
+                    break;
+            }
+        }
+        printf("\n");
+    }
 }
-
-

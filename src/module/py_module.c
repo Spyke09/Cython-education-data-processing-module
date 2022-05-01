@@ -94,6 +94,14 @@ static PyObject *py_print_column(PyObject* a, PyObject *args)
     return Py_None;
 }
 
+static PyObject* py_print_table(PyObject* a, PyObject *args)
+{
+    py_table* self = (py_table*)a;
+    print_table(self->dt);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
 static void py_column_dealloc(py_column *self)
 {
     clear_column(self->col);
@@ -206,14 +214,6 @@ static PyObject* set_column_from_ind(PyObject* a, PyObject* args)
     return Py_None;
 }
 
-static PyObject *py_print_table(PyObject* a, PyObject* args)
-{
-    py_table* self = (py_table*)a;
-    for (int i=0; i<self->dt->len; i++)
-        print_column(self->dt->columns[i]);
-    Py_INCREF(Py_None);
-    return Py_None;
-}
 
 static void py_table_dealloc(py_table *self)
 {
@@ -272,12 +272,6 @@ static PyMethodDef column_methods[] = {
 
 static PyMethodDef table_methods[] = {
     {
-        "print_table",
-        py_print_table,
-        METH_VARARGS,
-        "Print table"
-    },
-    {
         "shape",
         table_shape,
         METH_VARARGS,
@@ -300,6 +294,12 @@ static PyMethodDef table_methods[] = {
         set_column_from_ind,
         METH_VARARGS,
         "Setter of columns"
+    },
+    {
+        "print_table",
+        py_print_table,
+        METH_VARARGS,
+        "Print table"
     },
     {NULL, NULL, 0, NULL}
 };
