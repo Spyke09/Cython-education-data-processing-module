@@ -16,6 +16,7 @@ typedef struct
 } table;
 
 table* table_from_csv(char* filename, char delim);
-void print_table(table* table);
+void print_table(table* table, int n);
+void print_column_types(table* table);
 
 #endif TABLE_H

@@ -104,6 +104,14 @@ static PyObject* py_print_table(PyObject* a, PyObject *args)
     return Py_None;
 }
 
+static PyObject* py_print_column_types(PyObject* a, PyObject *args)
+{
+    py_table* self = (py_table*)a;
+    print_column_types(self->dt);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
 static PyObject* py_head_table(PyObject* a, PyObject *args)
 {
     py_table* self = (py_table*)a;
@@ -137,6 +145,43 @@ static PyObject* table_shape(PyObject* a, PyObject* args)
     int cols = self->dt->len;
     int rows = self->dt->columns[0]->len;
     return Py_BuildValue("ii", rows, cols);
+}
+
+static PyObject* py_get_max_value(PyObject* a, PyObject* args)
+{
+    py_column* self = (py_column*)a;
+    switch(self->col->type)
+    {
+        case INT_TYPE:
+            int max_i = INT_MIN;
+            for (int i = 0; i < self->col->len; i++)
+            {
+                if (get_int(self->col, i) > max_i) max_i = get_int(self->col, i);
+            }
+            return Py_BuildValue("i", max_i);
+                break;
+        case DOUBLE_TYPE:
+            double max_d = DBL_MIN;
+            for (int i = 0; i < self->col->len; i++)
+            {
+                if (get_double(self->col, i) > max_d) max_d = get_double(self->col, i);
+            }
+            return Py_BuildValue("d", max_d);
+            break;
+        case BOOL_TYPE:
+            return Py_BuildValue("i", 1);
+            break;
+        case STRING_TYPE:
+            char* max_s = "";
+            for (int i = 0; i < self->col->len; i++)
+            {
+                char* st = vec_to_str(get_str(self->col, i));
+                if (strlen(st) > strlen(max_s)) max_s = st;
+                free(st);
+            }
+            return Py_BuildValue("s", max_s);
+            break;
+    }
 }
 
 static PyObject* get_column_from_name(PyObject* a, PyObject* args)
@@ -277,6 +322,12 @@ static PyMethodDef column_methods[] = {
         METH_VARARGS,
         "Len of column"
     },
+    {
+        "max",
+        py_get_max_value,
+        METH_VARARGS,
+        "Getter of maxvalue of a column"
+    },
     {NULL, NULL, 0, NULL}
 };
 
@@ -316,6 +367,12 @@ static PyMethodDef table_methods[] = {
         py_head_table,
         METH_VARARGS,
         "Head"
+    },
+    {
+        "print_column_types",
+        py_print_column_types,
+        METH_VARARGS,
+        "Print column types"
     },
     {NULL, NULL, 0, NULL}
 };

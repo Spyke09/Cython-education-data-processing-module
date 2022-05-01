@@ -138,3 +138,28 @@ void print_table(table* table, int number)
     }
     printf("\n");
 }
+
+void print_column_types(table* dt)
+{
+    for (int i = 0; i < dt->len; i++)
+    {
+        char *st = vec_to_str(dt->columns[i]->name);
+        switch(dt->columns[i]->type)
+        {
+            case INT_TYPE:
+                printf("%20s%7s", st, "int");
+                break;
+            case BOOL_TYPE:
+                printf("%20s%7s", st, "bool");
+                break;
+            case DOUBLE_TYPE:
+                printf("%20s%7s", st, "double");
+                break;
+            case STRING_TYPE:
+                printf("%20s%7s", st, "str");
+                break;
+        }
+        free(st);
+        printf("\n");
+    }
+}
