@@ -1,16 +1,34 @@
 #include "column.h"
 
+void set_name_from_str(column* b, char* name)
+{
+    v_init(b->name);
+    for (int i = 0; name[i]!='\0' && i<MAX_STR_LEN; i++) v_push(b->name, name[i]);
+}
+
+void set_name_from_vec(column* b, vector_char_t* name)
+{
+    v_init(b->name);
+    for (int i = 0; i<name->len; i++) v_push(b->name, name->data[i]);
+}
+
 // сеттеры для каждого типа для абстргирования от ссылок и указателей
-void set_vec_str(column* a, vector_char_t* value, int ind)
+void set_vec_str_with_del(column* a, vector_char_t* value, int ind)
 {
     free(((vector_char_t*)(a->values[ind]))->data);
     free(a->values[ind]);
     *(vector_char_t*)(a->values[ind]) = *value;
 }
 
+void set_vec_str(column* a, vector_char_t* value, int ind)
+{
+    v_clear((vector_char_t*)(a->values[ind]));
+    for (int i = 0; i<value->len; ++i) v_push((vector_char_t*)(a->values[ind]), value->data[i]);
+}
+
 void set_str(column* a, char* value, int ind)
 {
-    free(((vector_char_t*)(a->values[ind]))->data);
+    v_clear(((vector_char_t*)(a->values[ind])));
     str_to_vec(a->values[ind], value);
 }
 
@@ -97,6 +115,8 @@ column* create_column(TYPE a, int n)
     res->size = type_size(a);
     res->len = n;
     res->values = malloc(n*sizeof(void*));
+    res->name = malloc(sizeof(vector_char_t));
+    set_name_from_str(res, "unnamed");
     switch(a)
     {
         case INT_TYPE:
@@ -135,6 +155,7 @@ column* create_column(TYPE a, int n)
 void print_column(column* a)
 {
     int ot = 10;
+    print_vec_str(a->name);
     switch(a->type)
     {
         case INT_TYPE:
@@ -175,16 +196,17 @@ column* get_column_str(char** str, int len)
 }
 
 // метод освобождения памяти, занимаемой колонкой
-void clear_column(column** a)
+void clear_column(column* a)
 {
-    if ((*a)->type==STRING_TYPE)
-        for (int i = 0; i<(*a)->len; ++i){
-            vector_char_t* t = get_str(*a, i);
+    v_clear(a->name);
+    free(a->name);
+    if (a->type==STRING_TYPE)
+        for (int i = 0; i<a->len; ++i){
+            vector_char_t* t = get_str(a, i);
             v_clear(t);
         }
-    for (int i = 0; i<(*a)->len; ++i) free((*a)->values[i]);
-    free((*a)->values);
-    free(*a);
+    for (int i = 0; i<a->len; ++i) free(a->values[i]);
+    free(a->values);
 }
 
 // далее методы преобразования
@@ -193,7 +215,7 @@ column* get_typed_column_from_str(column** an, TYPE type)
 {
     column* a = *an;
     column* b = create_column(type, a->len);
-    b->name = a->name;
+    set_name_from_vec(b, a->name);
     switch(type)
     {
         case INT_TYPE:
@@ -235,7 +257,7 @@ column* get_typed_column_from_int(column** an, TYPE type)
 {
     column* a = *an;
     column* b = create_column(type, a->len);
-    b->name = a->name;
+    set_name_from_vec(b, a->name);
     switch(type)
     {
         case INT_TYPE:
@@ -266,12 +288,12 @@ column* get_typed_column_from_double(column** an, TYPE type)
 {
     column* a = *an;
     column* b = create_column(type, a->len);
-    b->name = a->name;
+    set_name_from_vec(b, a->name);
     switch(type)
     {
         case INT_TYPE:
             for (int i = 0; i<a->len; ++i)
-                set_int(b, get_double(a, i), i);
+                set_int(b, (int)get_double(a, i), i);
             break;
         case DOUBLE_TYPE:
             for (int i = 0; i<a->len; ++i)
@@ -279,7 +301,7 @@ column* get_typed_column_from_double(column** an, TYPE type)
             break;
         case BOOL_TYPE:
             for (int i = 0; i<a->len; ++i)
-                set_bool(b, get_double(a, i), i);
+                set_bool(b, (int)get_double(a, i), i);
             break;
         case STRING_TYPE:
             for (int i = 0; i<a->len; ++i) {
@@ -314,7 +336,8 @@ column* get_typed_column(column** an, TYPE type)
 void type_column(column** an, TYPE type)
 {
     column* b = get_typed_column(an, type);
-    clear_column(an);
+    clear_column(*an);
+    free(*an);
     *an = b;
 }
 
@@ -322,4 +345,11 @@ void print_vec_str(vector_char_t* t)
 {
     for (int i = 0; i<t->len; ++i) printf("%c", t->data[i]);
     printf("\n");
+}
+
+int str_vec_equal(vector_char_t* a, vector_char_t* b)
+{
+    if (a->len!=b->len) return 0;
+    for (int i = 0; i<a->len; ++i) if (a->data[i]!=b->data[i]) return 0;
+    return 1;
 }
