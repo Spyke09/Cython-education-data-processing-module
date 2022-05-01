@@ -96,8 +96,18 @@ static PyObject *py_print_column(PyObject* a, PyObject *args)
 
 static PyObject* py_print_table(PyObject* a, PyObject *args)
 {
+    int n;
+    if (!PyArg_ParseTuple(args, "i", &n)) return NULL;
     py_table* self = (py_table*)a;
-    print_table(self->dt);
+    print_table(self->dt, n);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyObject* py_head_table(PyObject* a, PyObject *args)
+{
+    py_table* self = (py_table*)a;
+    print_table(self->dt, 10);
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -300,6 +310,12 @@ static PyMethodDef table_methods[] = {
         py_print_table,
         METH_VARARGS,
         "Print table"
+    },
+    {
+        "head",
+        py_head_table,
+        METH_VARARGS,
+        "Head"
     },
     {NULL, NULL, 0, NULL}
 };

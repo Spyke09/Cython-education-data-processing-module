@@ -96,10 +96,11 @@ table* table_from_csv(char* filename, char del)
     return data;
 }
 
-void print_table(table* table)
+void print_table(table* table, int number)
 {
     int ot = 20;
-
+    number = min(number, table->columns[0]->len);
+    printf("\n");
     for (int n = 0;n < table->len; n++)
     {
         vector_char_t* v = table->columns[n]->name;
@@ -111,7 +112,7 @@ void print_table(table* table)
     for (int i=0;i<ot*(table->len);i++) printf("_");
     printf("\n");
 
-    for (int i = 0; i<table->columns[0]->len; i++)
+    for (int i = 0; i<number; i++)
     {
         for (int j = 0; j<table->len; j++)
         {
@@ -135,4 +136,5 @@ void print_table(table* table)
         }
         printf("\n");
     }
+    printf("\n");
 }
