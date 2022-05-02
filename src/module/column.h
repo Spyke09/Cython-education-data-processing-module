@@ -51,5 +51,6 @@ void print_vec_str(vector_char_t* t);
 void set_name_from_vec(column* b, vector_char_t* name);
 
 int str_vec_equal(vector_char_t* a, vector_char_t* b);
+column* copy_column(column* a);
 
 #endif
