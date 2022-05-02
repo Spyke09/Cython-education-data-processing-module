@@ -237,7 +237,7 @@ static PyObject* py_insert_column(PyObject* a, PyObject* args)
         {
             res[i] = self->dt->columns[i];
         }
-        res[self->dt->len] = ins_col->col;
+        res[self->dt->len] = copy_column(ins_col->col);
         free(self->dt->columns);
         self->dt->columns = res;
         self->dt->len++;
