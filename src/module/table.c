@@ -155,19 +155,19 @@ void print_column_types(table* dt)
         switch(dt->columns[i]->type)
         {
             case INT_TYPE:
-                printf("%20s%7s", st, "int");
+                printf("%20s%7s\n", st, "int");
                 break;
             case BOOL_TYPE:
-                printf("%20s%7s", st, "bool");
+                printf("%20s%7s\n", st, "bool");
                 break;
             case DOUBLE_TYPE:
-                printf("%20s%7s", st, "double");
+                printf("%20s%7s\n", st, "double");
                 break;
             case STRING_TYPE:
-                printf("%20s%7s", st, "str");
+                printf("%20s%7s\n", st, "str");
                 break;
         }
         free(st);
-        printf("\n");
     }
+    printf("\n");
 }

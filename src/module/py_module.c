@@ -38,7 +38,7 @@ static PyObject *len_of_py_column(PyObject *a, PyObject *args)
 
 static PyObject *py_fill_column_from_list(PyObject *a, PyObject *args)
 {
-Py_INCREF(Py_None);
+    Py_INCREF(Py_None);
     py_column* self = (py_column*)a;
     PyObject *pList;
     PyObject *pItem;
@@ -302,17 +302,12 @@ static PyObject* set_column_from_ind(PyObject* a, PyObject* args)
 {
     py_table* self = (py_table*)a;
     int ind = -1;
-    PyObject *pList;
-    PyObject *pItem;
+    py_column* added_c;
     Py_ssize_t n;
-    if (!PyArg_ParseTuple(args, "O!", &PyList_Type, &pList)) {
+    if (!PyArg_ParseTuple(args, "iO!", &ind, &py_column_Type, &added_c)) {
         PyErr_SetString(PyExc_TypeError, "parameter must be a list.");
         return NULL;
     }
-    pItem = PyList_GetItem(pList, 1);
-    ind = PyLong_AsLong(pItem);
-    pItem = PyList_GetItem(pList, 0);
-    py_column* added_c = (py_column*)pItem;
     column** cc = &(self->dt->columns[ind]);
     if(self->dt->len<=ind) return NULL;
     clear_column(*cc);
@@ -328,6 +323,35 @@ static PyObject* set_column_from_ind(PyObject* a, PyObject* args)
     if (added_c->col->type==INT_TYPE)
         for (int i = 0; i<c->len; ++i) set_int(c, get_int(added_c->col, i), i);
     Py_INCREF(Py_None);
+    return Py_None;
+}
+
+PyObject* set_types(PyObject* a, PyObject* args)
+{
+    Py_INCREF(Py_None);
+    py_table* self = (py_table*)a;
+    PyObject *pList;
+    PyObject *pItem;
+    Py_ssize_t n;
+    if (!PyArg_ParseTuple(args, "O!", &PyList_Type, &pList)) {
+        PyErr_SetString(PyExc_TypeError, "parameter must be a list.");
+        return NULL;
+    }
+    n = PyList_Size(pList);
+    if (n!=(self->dt->len)) {
+        PyErr_SetString(PyExc_TypeError, "Invalid size");
+        return NULL;
+    }
+    for (int i = 0; i<n; ++i)
+    {
+        pItem = PyList_GetItem(pList, i);
+        PyObject *encodedString = PyUnicode_AsEncodedString(pItem, "UTF-8", "strict");
+        char* s = PyBytes_AsString(encodedString);
+        if (strcmp("int", s)==0) type_column(&(self->dt->columns[i]), INT_TYPE);
+        if (strcmp("float", s)==0) type_column(&(self->dt->columns[i]), DOUBLE_TYPE);
+        if (strcmp("bool", s)==0) type_column(&(self->dt->columns[i]), BOOL_TYPE);
+        if (strcmp("str", s)==0) type_column(&(self->dt->columns[i]), STRING_TYPE);
+    }
     return Py_None;
 }
 
@@ -412,7 +436,7 @@ static PyMethodDef ownmod_methods[] = {
 
 static PyMethodDef column_methods[] = {
     {
-        "print_column",
+        "print",
         py_print_column,
         METH_VARARGS,
         "Print column"
@@ -476,7 +500,7 @@ static PyMethodDef table_methods[] = {
         "Setter of columns"
     },
     {
-        "print_table",
+        "print",
         py_print_table,
         METH_VARARGS,
         "Print table"
@@ -504,6 +528,12 @@ static PyMethodDef table_methods[] = {
         sort_table,
         METH_VARARGS,
         "Sort table"
+    },
+    {
+        "set_types",
+        set_types,
+        METH_VARARGS,
+        "Set types table"
     },
     {NULL, NULL, 0, NULL}
 };
