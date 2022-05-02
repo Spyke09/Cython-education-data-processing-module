@@ -1,4 +1,7 @@
 #include <Python.h>
+#include <limits.h>
+#include <float.h>
+#include <string.h>
 #include "column.h"
 #include "vector.h"
 #include "table.h"
