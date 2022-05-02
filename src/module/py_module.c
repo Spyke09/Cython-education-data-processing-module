@@ -221,6 +221,31 @@ static PyObject* py_get_min_value(PyObject* a, PyObject* args)
     }
 }
 
+static PyObject* py_insert_column(PyObject* a, PyObject* args)
+{
+    py_table* self = (py_table*)a;
+    py_column* ins_col;
+    if (!PyArg_ParseTuple(args, "O!", &py_column_Type, &ins_col)) {
+        PyErr_SetString(PyExc_TypeError, "parameter must be a list.");
+        return NULL;
+    }
+    column** res = (column**)malloc((self->dt->len + 1)*sizeof(column*));
+    Py_INCREF(Py_None);
+    if (self->dt->columns[0]->len == ins_col->col->len)
+    {
+        for (int i = 0; i < self->dt->len; i++)
+        {
+            res[i] = self->dt->columns[i];
+        }
+        res[self->dt->len] = ins_col->col;
+        free(self->dt->columns);
+        self->dt->columns = res;
+        self->dt->len++;
+        return Py_None;
+    }
+    else return Py_None;
+}
+
 static PyObject* get_column_from_name(PyObject* a, PyObject* args)
 {
     py_table* self = (py_table*)a;
@@ -416,6 +441,12 @@ static PyMethodDef table_methods[] = {
         py_print_column_types,
         METH_VARARGS,
         "Print column types"
+    },
+    {
+        "insert",
+        py_insert_column,
+        METH_VARARGS,
+        "Insert column"
     },
     {NULL, NULL, 0, NULL}
 };
