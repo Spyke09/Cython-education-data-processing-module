@@ -2,13 +2,13 @@
 
 void set_name_from_str(column* b, char* name)
 {
-    v_init(b->name);
+    v_clear(b->name);
     for (int i = 0; name[i]!='\0' && i<MAX_STR_LEN; i++) v_push(b->name, name[i]);
 }
 
 void set_name_from_vec(column* b, vector_char_t* name)
 {
-    v_init(b->name);
+    v_clear(b->name);
     for (int i = 0; i<name->len; i++) v_push(b->name, name->data[i]);
 }
 
@@ -116,6 +116,7 @@ column* create_column(TYPE a, int n)
     res->len = n;
     res->values = malloc(n*sizeof(void*));
     res->name = malloc(sizeof(vector_char_t));
+    v_init(res->name);
     set_name_from_str(res, "unnamed");
     switch(a)
     {
@@ -352,4 +353,26 @@ int str_vec_equal(vector_char_t* a, vector_char_t* b)
     if (a->len!=b->len) return 0;
     for (int i = 0; i<a->len; ++i) if (a->data[i]!=b->data[i]) return 0;
     return 1;
+}
+
+column* copy_column(column* a)
+{
+    column* b = create_column(a->type, a->len);
+    set_name_from_vec(b, a->name);
+    switch(a->type)
+    {
+        case INT_TYPE:
+            for (int i = 0; i<a->len; ++i) set_int(b, get_int(a, i), i);
+            break;
+        case BOOL_TYPE:
+            for (int i = 0; i<a->len; ++i) set_bool(b, get_bool(a, i), i);
+            break;
+        case DOUBLE_TYPE:
+            for (int i = 0; i<a->len; ++i) set_double(b, get_double(a, i), i);
+            break;
+        case STRING_TYPE:
+            for (int i = 0; i<a->len; ++i) set_vec_str(b, get_str(a, i), i);
+            break;
+    }
+    return b;
 }

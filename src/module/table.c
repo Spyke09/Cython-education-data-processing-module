@@ -67,9 +67,8 @@ table* table_from_csv(char* filename, char del)
     tok = strtok(str, delim);
     for (int j = 0; j<columns && tok != NULL; j++)
     {
-        data->columns[j]->name = malloc(sizeof(vector_char_t));
         vector_char_t* temp = data->columns[j]->name;
-        v_init(temp);
+        v_clear(temp);
         for (int i = 0; tok[i]!='\0'&&i<LEN; ++i) v_push(temp, tok[i]);
         tok = strtok(NULL, delim);
     }
@@ -93,6 +92,15 @@ table* table_from_csv(char* filename, char del)
     {
         fprintf(stderr, "File not found.");
     }
+    return data;
+}
+
+table* copy_table(table* t)
+{
+    table* data = (table*)malloc(sizeof(table));
+    data->len = t->len;
+    data->columns = (column**)malloc((t->len)*sizeof(column*));
+    for (int i = 0; i<t->len; ++i) data->columns[i] = copy_column(t->columns[i]);
     return data;
 }
 

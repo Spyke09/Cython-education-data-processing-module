@@ -331,6 +331,57 @@ static PyObject* set_column_from_ind(PyObject* a, PyObject* args)
     return Py_None;
 }
 
+void quickSort(table *dt, int first, int last, int key, TYPE type)
+{
+    if (first < last)
+    {
+        int left = first, right = last;
+        int middle = (left+right)/2;
+        do
+        {
+            if (type==INT_TYPE)
+            {
+                while (get_int(dt->columns[key],left) < get_int(dt->columns[key], middle)) left++;
+                while (get_int(dt->columns[key],right) > get_int(dt->columns[key], middle)) right--;
+            }
+            else if (type==DOUBLE_TYPE)
+            {
+                while (get_double(dt->columns[key],left) < get_double(dt->columns[key], middle)) left++;
+                while (get_double(dt->columns[key],right) > get_double(dt->columns[key], middle)) right--;
+            }
+            if (left <= right)
+            {
+                for (int i = 0; i<dt->len; ++i)
+                {
+                    void* t = dt->columns[i]->values[left];
+                    dt->columns[i]->values[left] = dt->columns[i]->values[right];;
+                    dt->columns[i]->values[right] = t;
+                }
+                left++;
+                right--;
+            }
+        } while (left <= right);
+        quickSort(dt, first, right, key, type);
+        quickSort(dt, left, last, key, type);
+    }
+}
+
+static PyObject* sort_table(PyObject* a, PyObject* args)
+{
+    py_table* self = (py_table*)a;
+    int key;
+    if (!PyArg_ParseTuple(args, "i", &key))
+        return NULL;
+    TYPE type = self->dt->columns[key]->type;
+    Py_INCREF(Py_None);
+    if (type!=DOUBLE_TYPE && type!=INT_TYPE) return Py_None;
+    table* old_t = self->dt;
+    table* new_t = copy_table(old_t);
+    quickSort(new_t, 0, new_t->columns[0]->len-1, key, type);
+    py_table* result = PyObject_NEW(py_table, &py_table_Type);
+    result->dt = new_t;
+    return (PyObject*)result;
+}
 
 static void py_table_dealloc(py_table *self)
 {
@@ -447,6 +498,12 @@ static PyMethodDef table_methods[] = {
         py_insert_column,
         METH_VARARGS,
         "Insert column"
+    },
+    {
+        "sort_by",
+        sort_table,
+        METH_VARARGS,
+        "Sort table"
     },
     {NULL, NULL, 0, NULL}
 };
