@@ -355,39 +355,89 @@ PyObject* set_types(PyObject* a, PyObject* args)
     return Py_None;
 }
 
-void quickSort(table *dt, int first, int last, int key, TYPE type)
+double median3(double a, double b, double c)
 {
-    if (first < last)
+    if ((a<=b && a>=c) || (a<=c && a>=b)) return  a;
+    if ((b<=c && b>=a) || (b<=a && b>=c)) return  b;
+    if ((c<=a && c>=b) || (c<=b && c>=a)) return  c;
+}
+
+void insertionSort(table *dt, int first, int last, int key, TYPE type)
+{
+    for (int t = first; t<last+1; ++t)
     {
-        int left = first, right = last;
-        int middle = (left+right)/2;
-        do
-        {
-            if (type==INT_TYPE)
-            {
-                while (get_int(dt->columns[key],left) < get_int(dt->columns[key], middle)) left++;
-                while (get_int(dt->columns[key],right) > get_int(dt->columns[key], middle)) right--;
-            }
-            else if (type==DOUBLE_TYPE)
-            {
-                while (get_double(dt->columns[key],left) < get_double(dt->columns[key], middle)) left++;
-                while (get_double(dt->columns[key],right) > get_double(dt->columns[key], middle)) right--;
-            }
-            if (left <= right)
+        int j = t - 1;
+        if (type==INT_TYPE)
+            while(j>=0 && get_int(dt->columns[key],j) > get_int(dt->columns[key],j+1))
             {
                 for (int i = 0; i<dt->len; ++i)
                 {
-                    void* t = dt->columns[i]->values[left];
-                    dt->columns[i]->values[left] = dt->columns[i]->values[right];;
-                    dt->columns[i]->values[right] = t;
+                    void* temp = dt->columns[i]->values[j];
+                    dt->columns[i]->values[j] = dt->columns[i]->values[j+1];
+                    dt->columns[i]->values[j+1] = temp;
                 }
-                left++;
-                right--;
+                j--;
             }
-        } while (left <= right);
-        quickSort(dt, first, right, key, type);
-        quickSort(dt, left, last, key, type);
+        if (type==DOUBLE_TYPE)
+            while(j>=0 && get_double(dt->columns[key],j) > get_double(dt->columns[key],j+1))
+            {
+                for (int i = 0; i<dt->len; ++i)
+                {
+                    void* temp = dt->columns[i]->values[j];
+                    dt->columns[i]->values[j] = dt->columns[i]->values[j+1];
+                    dt->columns[i]->values[j+1] = temp;
+                }
+                j--;
+            }
     }
+}
+
+void quickSort(table *dt, int first, int last, int key, TYPE type)
+{
+    if (last - first < 11){
+        insertionSort(dt, first, last, key, type);
+        return;
+    }
+
+    int left = first, right = last;
+    int middle = (left+right)/2;
+    double a, b, c;
+    if (type==INT_TYPE){
+        a = get_int(dt->columns[key],left);
+        c = get_int(dt->columns[key],middle);
+        b = get_int(dt->columns[key],right);
+    }
+    if (type==DOUBLE_TYPE){
+        a = get_double(dt->columns[key],left);
+        c = get_double(dt->columns[key],middle);
+        b = get_double(dt->columns[key],right);
+    }
+    double median = median3(a, b, c);
+    while(left<=right)
+    {
+        if (type==INT_TYPE)
+        {
+            while (get_int(dt->columns[key],left) < median) left++;
+            while (get_int(dt->columns[key],right) > median) right--;
+        }
+        else if (type==DOUBLE_TYPE)
+        {
+            while (get_double(dt->columns[key],left) < median) left++;
+            while (get_double(dt->columns[key],right) > median) right--;
+        }
+        if (left >= right) break;
+        for (int i = 0; i<dt->len; ++i)
+        {
+            void* t = dt->columns[i]->values[left];
+            dt->columns[i]->values[left] = dt->columns[i]->values[right];
+            dt->columns[i]->values[right] = t;
+
+        }
+        left++;
+        right--;
+    }
+    quickSort(dt, first, right, key, type);
+    quickSort(dt, right+1, last, key, type);
 }
 
 static PyObject* sort_table(PyObject* a, PyObject* args)

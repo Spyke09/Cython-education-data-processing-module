@@ -5,6 +5,7 @@
 #include "column.h"
 #include "vector.h"
 #include "table.h"
+#include <math.h>
 
 typedef struct
 {
